@@ -1,0 +1,3 @@
+[submodule "bao-static-guest-loader"]
+	path = bao-static-guest-loader
+	url = git@github.com:bao-project/bao-static-guest-loader.git
