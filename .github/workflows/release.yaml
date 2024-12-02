@@ -1,0 +1,54 @@
+name: Build and Release Linux Kernel and RootFS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc git wget cpio flex bison libssl-dev gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+
+      - name: Build project
+        env:
+          PLATFORM: qemu-aarch64-virt # Change to desired platform
+          ARCH: arm64                # Adjust based on platform
+        run: |
+          make setup
+          make buildroot
+          make linux
+
+      - name: Archive Kernel and RootFS
+        run: |
+          tar czf linux-rootfs-${{ env.PLATFORM }}.tar.gz -C wrkdir Image-${{ env.PLATFORM }} rootfs_${{ env.ARCH }}.cpio
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Kernel and RootFS
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux-rootfs-${{ env.PLATFORM }}.tar.gz
+          asset_name: linux-rootfs-${{ env.PLATFORM }}.tar.gz
+          label: Linux Kernel and RootFS for ${{ env.PLATFORM }}
