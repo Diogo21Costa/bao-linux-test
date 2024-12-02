@@ -27,7 +27,7 @@ ifeq ($(filter $(PLATFORM), $(PLATFORMS_AARCH64)), $(PLATFORM))
 
 else ifeq ($(filter $(PLATFORM), $(PLATFORMS_RISCV64)), $(PLATFORM))
   BUILDROOT_ARCH := riscv64
-  LINUX_REPO := git@github.com:torvalds/linux.git
+  LINUX_REPO := https://github.com/torvalds/linux.git
   LINUX_VERSION := v6.1
 
 else
