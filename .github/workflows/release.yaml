@@ -21,7 +21,7 @@ jobs:
       - name: Build project
         env:
           PLATFORM: qemu-aarch64-virt # Change to desired platform
-          ARCH: arm64                # Adjust based on platform
+          ARCH: aarch64               # Adjust based on platform
         run: |
           make setup
           make buildroot
