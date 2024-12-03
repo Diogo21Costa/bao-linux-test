@@ -1,11 +1,11 @@
-name: Build and Release Linux Kernel and RootFS
+name: Build and Release Linux Kernel and Buildroot
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
-    name: Build and Release
+  build-buildroot:
+    name: Build Buildroot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -18,37 +18,85 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential bc git wget cpio flex bison libssl-dev gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
 
-      - name: Build project
+      - name: Build Buildroot
         env:
-          PLATFORM: qemu-aarch64-virt # Change to desired platform
+          PLATFORM: qemu-aarch64-virt # Adjust for your desired platform
           ARCH: aarch64               # Adjust based on platform
         run: |
           make setup
           make buildroot
-          make linux
 
-      - name: Archive Kernel and RootFS
+      - name: Archive Buildroot RootFS
         run: |
-          tar czf linux-rootfs-${{ env.PLATFORM }}.tar.gz -C wrkdir Image-${{ env.PLATFORM }} rootfs_${{ env.ARCH }}.cpio
+          tar czf buildroot-rootfs-${{ env.PLATFORM }}.tar.gz -C wrkdir rootfs_${{ env.ARCH }}.cpio
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create Buildroot Release
+        id: create_buildroot_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: buildroot-${{ env.PLATFORM }}
+          release_name: Buildroot RootFS for ${{ env.PLATFORM }}
           draft: false
           prerelease: false
 
-      - name: Upload Kernel and RootFS
-        id: upload-release-asset
+      - name: Upload Buildroot RootFS
+        id: upload-buildroot-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-rootfs-${{ env.PLATFORM }}.tar.gz
-          asset_name: linux-rootfs-${{ env.PLATFORM }}.tar.gz
-          label: Linux Kernel and RootFS for ${{ env.PLATFORM }}
+          upload_url: ${{ steps.create_buildroot_release.outputs.upload_url }}
+          asset_path: ./buildroot-rootfs-${{ env.PLATFORM }}.tar.gz
+          asset_name: buildroot-rootfs-${{ env.PLATFORM }}.tar.gz
+          label: Buildroot RootFS for ${{ env.PLATFORM }}
+
+  build-linux:
+    name: Build Linux Kernel
+    runs-on: ubuntu-latest
+    needs: build-buildroot # Ensures Linux Kernel builds only after Buildroot job completes
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc git wget cpio flex bison libssl-dev gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+
+      - name: Build Linux Kernel
+        env:
+          PLATFORM: qemu-aarch64-virt # Adjust for your desired platform
+          ARCH: aarch64               # Adjust based on platform
+        run: |
+          make setup
+          make linux
+
+      - name: Archive Linux Kernel Image
+        run: |
+          tar czf linux-kernel-${{ env.PLATFORM }}.tar.gz -C wrkdir Image-${{ env.PLATFORM }}
+
+      - name: Create Linux Kernel Release
+        id: create_linux_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: linux-${{ env.PLATFORM }}
+          release_name: Linux Kernel for ${{ env.PLATFORM }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Kernel Image
+        id: upload-linux-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_linux_release.outputs.upload_url }}
+          asset_path: ./linux-kernel-${{ env.PLATFORM }}.tar.gz
+          asset_name: linux-kernel-${{ env.PLATFORM }}.tar.gz
+          label: Linux Kernel for ${{ env.PLATFORM }}
