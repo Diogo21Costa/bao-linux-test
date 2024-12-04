@@ -17,7 +17,7 @@ PLATFORMS_RISCV64 := qemu-riscv64-virt
 
 ifeq ($(filter $(PLATFORM), $(PLATFORMS_AARCH64)), $(PLATFORM))
   BUILDROOT_ARCH := arm64
-  LINUX_REPO := git@github.com:torvalds/linux.git
+  LINUX_REPO := https://github.com/torvalds/linux.git
   LINUX_VERSION := v6.1
 
   ifeq ($(PLATFORM), imx8qm)
