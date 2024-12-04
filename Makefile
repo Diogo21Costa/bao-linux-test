@@ -17,7 +17,7 @@ PLATFORMS_RISCV64 := qemu-riscv64-virt
 
 ifeq ($(filter $(PLATFORM), $(PLATFORMS_AARCH64)), $(PLATFORM))
   BUILDROOT_ARCH := arm64
-  LINUX_REPO := git@github.com:torvalds/linux.git
+  LINUX_REPO := https://github.com/torvalds/linux.git
   LINUX_VERSION := v6.1
 
   ifeq ($(PLATFORM), imx8qm)
@@ -51,21 +51,21 @@ setup:
 
 buildroot: setup
 	git clone $(BUILDROOT_REPO) $(BUILDROOT_SRC) --depth 1 --branch $(BUILDROOT_VERSION)
-	cd $(BUILDROOT_SRC) && \
-	make defconfig BR2_DEFCONFIG=$(BAO_BUILDROOT_DEFCFG) && \
-	make
-	cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(ARCH).cpio
+	# cd $(BUILDROOT_SRC) && \
+	# make defconfig BR2_DEFCONFIG=$(BAO_BUILDROOT_DEFCFG) && \
+	# make
+	# cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(ARCH).cpio
 
 linux: setup
 	git clone $(LINUX_REPO) $(LINUX_SRC) --depth 1 --branch $(LINUX_VERSION)
-	cd $(LINUX_SRC) && \
-	if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
-	  git am $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
-	fi
-	cd $(LINUX_SRC) && \
-	make defconfig ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- && \
-	make ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- -j$$(nproc) Image
-	cp $(LINUX_SRC)/arch/$(BUILDROOT_ARCH)/boot/Image $(WRKDIR)/Image-$(PLATFORM)
+	# cd $(LINUX_SRC) && \
+	# if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
+	#   git am $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
+	# fi
+	# cd $(LINUX_SRC) && \
+	# make defconfig ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- && \
+	# make ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- -j$$(nproc) Image
+	# cp $(LINUX_SRC)/arch/$(BUILDROOT_ARCH)/boot/Image $(WRKDIR)/Image-$(PLATFORM)
 
 clean:
 	rm -rf $(WRKDIR)
