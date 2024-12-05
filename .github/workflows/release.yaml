@@ -1,21 +1,21 @@
-name: Build and Release Linux Kernel and Initramfs for Multiple Platforms (Test Workflow)
-
 on:
   workflow_dispatch:
 
+name: Create Release with Placeholder Files
+
+
 jobs:
   build:
+    name: Create and Upload Release Asset
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repository
+    - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Define platforms and architectures
-      id: define_platforms
       run: |
         echo "PLATFORMS=qemu-aarch64-virt qemu-riscv64-virt" >> $GITHUB_ENV
-        echo "ARCHS=aarch64 riscv64" >> $GITHUB_ENV
 
     - name: Create placeholder files for each platform
       run: |
@@ -39,3 +39,33 @@ jobs:
       run: |
         # List the created placeholder files
         ls *.txt
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v1.0.0  # Replace this with your desired tag or dynamic version
+        release_name: Release v1.0.0
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./initramfs_qemu-aarch64-virt.cpio.txt  # Adjust file paths as needed
+        asset_name: initramfs_qemu-aarch64-virt.cpio.txt
+    - name: Upload Second Release Asset
+      id: upload-release-asset-2
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Image-qemu-aarch64-virt.txt
+        asset_name: Image-qemu-aarch64-virt.txt
