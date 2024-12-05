@@ -61,6 +61,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./initramfs_qemu-aarch64-virt.cpio  # Adjust file paths as needed
         asset_name: initramfs_qemu-aarch64-virt.cpio
+        asset_content_type: application/x-cpio
 
     - name: Upload Second Release Asset
       id: upload-release-asset-2
@@ -71,3 +72,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./Image-qemu-aarch64-virt  # Adjust file paths as needed
         asset_name: Image-qemu-aarch64-virt
+        asset_content_type: application/octet-stream
