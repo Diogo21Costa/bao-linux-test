@@ -22,7 +22,7 @@ jobs:
           if [ "$PLATFORM" == "qemu-aarch64-virt" ]; then
             ARCH="aarch64"
           elif [ "$PLATFORM" == "qemu-riscv64-virt" ]; then
-            ARCH="riscv64"
+            ARCH="riscv64"<
           fi
           
           # Export platform and architecture variables for Makefile
@@ -34,7 +34,6 @@ jobs:
           make PLATFORM=$PLATFORM ARCH=$ARCH buildroot  # This will build the rootfs.cpio file
           
           # Compress the initramfs placeholder into a .tar.gz file
-          cp wrkdir/rootfs_${ARCH}.cpio initramfs_${PLATFORM}.cpio
           tar -czf "initramfs_${PLATFORM}.tar.gz" "rootfs_${PLATFORM}.cpio"
         done
 
@@ -58,7 +57,6 @@ jobs:
           make PLATFORM=$PLATFORM ARCH=$ARCH linux  # This will build the kernel Image
           
           # Compress the kernel image placeholder into a .tar.gz file
-          cp wrkdir/Image-${PLATFORM} Image-${PLATFORM}
           tar -czf "Image-${PLATFORM}.tar.gz" "Image-${PLATFORM}"
         done
 

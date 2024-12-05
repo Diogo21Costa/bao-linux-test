@@ -50,10 +50,20 @@ setup:
 	mkdir -p $(WRKDIR)
 
 buildroot: setup
-	git clone $(BUILDROOT_REPO) $(BUILDROOT_SRC) --depth 1 --branch $(BUILDROOT_VERSION)
+	if [ ! -d "$(BUILDROOT_SRC)" ]; then \
+		echo "Cloning Buildroot repository..."; \
+		git clone $(BUILDROOT_REPO) $(BUILDROOT_SRC) --depth 1 --branch $(BUILDROOT_VERSION); \
+	else \
+		echo "Buildroot repository already exists, skipping clone."; \
+	fi
+
+	cd $(BUILDROOT_SRC) && \
+	make clean
+
 	cd $(BUILDROOT_SRC) && \
 	make defconfig BR2_DEFCONFIG=$(BAO_BUILDROOT_DEFCFG) && \
 	make
+
 	cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(PLATFORM).cpio
 
 linux: setup
