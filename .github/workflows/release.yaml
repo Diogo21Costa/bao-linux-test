@@ -30,16 +30,18 @@ jobs:
           
           # Create empty initramfs placeholder .cpio file
           touch "initramfs_${PLATFORM}.cpio"
+          tar -czf "initramfs_${PLATFORM}.tar.gz" "initramfs_${PLATFORM}.cpio"
           
           # Create empty kernel image placeholder .Image file
           touch "Image-${PLATFORM}"
+          tar -czf "Image-${PLATFORM}.tar.gz" "Image-${PLATFORM}"
         done
 
     - name: List created files
       run: |
         # List the created placeholder files
-        ls *.cpio
-        ls Image-*
+        ls *.tar.gz
+        
 
     - name: Create Release
       id: create_release
@@ -59,9 +61,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./initramfs_qemu-aarch64-virt.cpio  # Adjust file paths as needed
-        asset_name: initramfs_qemu-aarch64-virt.cpio
-        asset_content_type: application/x-cpio
+        asset_path: ./initramfs_qemu-aarch64-virt.tar.gz
+        asset_name: initramfs_qemu-aarch64-virt.tar.gz
 
     - name: Upload Second Release Asset
       id: upload-release-asset-2
@@ -70,6 +71,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Image-qemu-aarch64-virt  # Adjust file paths as needed
-        asset_name: Image-qemu-aarch64-virt
-        asset_content_type: application/octet-stream
+        asset_path: ./Image-qemu-aarch64-virt.tar.gz
+        asset_name: Image-qemu-aarch64-virt.tar.gz
