@@ -7,14 +7,12 @@ jobs:
   build:
     name: Create and Upload Release Asset
     runs-on: ubuntu-latest
+    env:  # Define PLATFORMS as an environment variable here
+      PLATFORMS: "qemu-aarch64-virt qemu-riscv64-virt"
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Define platforms and architectures
-      run: |
-        echo "PLATFORMS=qemu-aarch64-virt qemu-riscv64-virt" >> $GITHUB_ENV
 
     - name: Create placeholder files for each platform
       run: |
@@ -35,12 +33,6 @@ jobs:
           touch "Image-${PLATFORM}"
           tar -czf "Image-${PLATFORM}.tar.gz" "Image-${PLATFORM}"
         done
-
-    - name: List created files
-      run: |
-        # List the created placeholder files
-        ls *.tar.gz
-        
 
     - name: Create Release
       id: create_release
