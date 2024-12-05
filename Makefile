@@ -74,7 +74,7 @@ linux: setup
 
 	cd $(LINUX_SRC) && \
 	if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
-	  git am $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
+	  git apply $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
 	fi
 	cd $(LINUX_SRC) && \
 	make defconfig ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- && \
