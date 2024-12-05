@@ -39,7 +39,7 @@ jobs:
       run: |
         # List the created placeholder files
         ls *.cpio
-        ls *.Image
+        ls Image-*
 
     - name: Create Release
       id: create_release
