@@ -34,7 +34,7 @@ jobs:
           make PLATFORM=$PLATFORM ARCH=$ARCH buildroot  # This will build the rootfs.cpio file
           
           # Compress the initramfs placeholder into a .tar.gz file
-          tar -czf "initramfs_${PLATFORM}.tar.gz" "rootfs_${PLATFORM}.cpio"
+          tar -czf "initramfs_${PLATFORM}.tar.gz" "wrkdir/rootfs_${PLATFORM}.cpio"
         done
 
     - name: Build Kernel Image for each platform
@@ -57,7 +57,7 @@ jobs:
           make PLATFORM=$PLATFORM ARCH=$ARCH linux  # This will build the kernel Image
           
           # Compress the kernel image placeholder into a .tar.gz file
-          tar -czf "Image-${PLATFORM}.tar.gz" "Image-${PLATFORM}"
+          tar -czf "Image-${PLATFORM}.tar.gz" "wrkdir/Image-${PLATFORM}"
         done
 
     - name: Create Release

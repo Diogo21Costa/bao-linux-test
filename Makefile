@@ -59,15 +59,19 @@ buildroot: setup
 
 	cd $(BUILDROOT_SRC) && \
 	make clean
-
 	cd $(BUILDROOT_SRC) && \
 	make defconfig BR2_DEFCONFIG=$(BAO_BUILDROOT_DEFCFG) && \
 	make
-
 	cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(PLATFORM).cpio
 
 linux: setup
-	git clone $(LINUX_REPO) $(LINUX_SRC) --depth 1 --branch $(LINUX_VERSION)
+	if [ ! -d "$(LINUX_SRC)" ]; then \
+		echo "Cloning Linux repository..."; \
+		git clone $(LINUX_REPO) $(LINUX_SRC) --depth 1 --branch $(LINUX_VERSION); \
+	else \
+		echo "Linux repository already exists, skipping clone."; \
+	fi
+
 	cd $(LINUX_SRC) && \
 	if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
 	  git am $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
