@@ -1,4 +1,4 @@
-name: Build and Release Linux Kernel and Initramfs
+name: Build and Release Linux Kernel and Initramfs for Multiple Platforms (Test Workflow)
 
 on:
   workflow_dispatch:
@@ -17,23 +17,22 @@ jobs:
     name: Build Initramfs
     runs-on: ubuntu-latest
     needs: setup-environment
+    strategy:
+      matrix:
+        platform: [qemu-aarch64-virt, qemu-riscv64-virt]
+        arch: [aarch64, riscv64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Build Buildroot
+      - name: Simulate Buildroot Build
         env:
-          PLATFORM: qemu-aarch64-virt
-          ARCH: aarch64
+          PLATFORM: ${{ matrix.platform }}
+          ARCH: ${{ matrix.arch }}
         run: |
-          make setup
-          make buildroot
-
-      - name: Archive Initramfs
-        run: |
-          tar czf initramfs-${{ env.PLATFORM }}.tar.gz -C wrkdir rootfs_${{ env.ARCH }}.cpio
+          echo "Simulating Buildroot build for platform $PLATFORM and architecture $ARCH" > buildroot-${PLATFORM}-${ARCH}.txt
 
       - name: Create Initramfs Release
         id: create_buildroot_release
@@ -41,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: initramfs-${{ env.PLATFORM }}
-          release_name: Initramfs for ${{ env.PLATFORM }}
+          tag_name: initramfs-${{ matrix.platform }}
+          release_name: Initramfs for ${{ matrix.platform }}
           draft: false
           prerelease: false
 
@@ -53,31 +52,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_buildroot_release.outputs.upload_url }}
-          asset_path: ./initramfs-${{ env.PLATFORM }}.tar.gz
-          asset_name: initramfs-${{ env.PLATFORM }}.tar.gz
-          label: Initramfs for ${{ env.PLATFORM }}
+          asset_path: ./buildroot-${{ matrix.platform }}-${{ matrix.arch }}.txt
+          asset_name: buildroot-${{ matrix.platform }}-${{ matrix.arch }}.txt
+          label: Buildroot Log for ${{ matrix.platform }}-${{ matrix.arch }}
 
   build-linux:
     name: Build Linux Kernel
     runs-on: ubuntu-latest
     needs: [setup-environment, build-buildroot]
+    strategy:
+      matrix:
+        platform: [qemu-aarch64-virt, qemu-riscv64-virt]
+        arch: [aarch64, riscv64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Build Linux Kernel
+      - name: Simulate Linux Kernel Build
         env:
-          PLATFORM: qemu-aarch64-virt
-          ARCH: aarch64
+          PLATFORM: ${{ matrix.platform }}
+          ARCH: ${{ matrix.arch }}
         run: |
-          make setup
-          make linux
-
-      - name: Archive Linux Kernel
-        run: |
-          tar czf linux-kernel-${{ env.PLATFORM }}.tar.gz -C wrkdir Image-${{ env.PLATFORM }}
+          echo "Simulating Linux Kernel build for platform $PLATFORM and architecture $ARCH" > linux-kernel-${PLATFORM}-${ARCH}.txt
 
       - name: Create Linux Kernel Release
         id: create_linux_release
@@ -85,8 +83,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: linux-${{ env.PLATFORM }}
-          release_name: Linux Kernel for ${{ env.PLATFORM }}
+          tag_name: linux-${{ matrix.platform }}
+          release_name: Linux Kernel for ${{ matrix.platform }}
           draft: false
           prerelease: false
 
@@ -97,6 +95,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_linux_release.outputs.upload_url }}
-          asset_path: ./linux-kernel-${{ env.PLATFORM }}.tar.gz
-          asset_name: linux-kernel-${{ env.PLATFORM }}.tar.gz
-          label: Linux Kernel for ${{ env.PLATFORM }}
+          asset_path: ./linux-kernel-${{ matrix.platform }}-${{ matrix.arch }}.txt
+          asset_name: linux-kernel-${{ matrix.platform }}-${{ matrix.arch }}.txt
+          label: Linux Kernel Log for ${{ matrix.platform }}-${{ matrix.arch }}
