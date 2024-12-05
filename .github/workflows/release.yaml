@@ -35,7 +35,7 @@ jobs:
           
           # Compress the initramfs placeholder into a .tar.gz file
           cp wrkdir/rootfs_${ARCH}.cpio initramfs_${PLATFORM}.cpio
-          tar -czf "initramfs_${PLATFORM}.tar.gz" "initramfs_${PLATFORM}.cpio"
+          tar -czf "initramfs_${PLATFORM}.tar.gz" "rootfs_${PLATFORM}.cpio"
         done
 
     - name: Build Kernel Image for each platform
