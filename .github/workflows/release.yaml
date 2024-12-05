@@ -3,7 +3,6 @@ on:
 
 name: Create Release with Placeholder Files
 
-
 jobs:
   build:
     name: Create and Upload Release Asset
@@ -49,29 +48,27 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.0  # Replace this with your desired tag or dynamic version
+        tag_name: v1.0.0
         release_name: Release v1.0.0
         draft: false
         prerelease: false
 
     - name: Upload Release Assets
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./initramfs_qemu-aarch64-virt.tar.gz
-        asset_name: initramfs_qemu-aarch64-virt.tar.gz
-        asset_content_type: application/gzip
+      id: upload-release-assets
+      run: |
+        # Loop through platforms and upload corresponding files
+        for PLATFORM in $PLATFORMS; do
+          # Upload initramfs tarball
+          echo "Uploading initramfs_${PLATFORM}.tar.gz"
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/gzip" \
+            --data-binary @"initramfs_${PLATFORM}.tar.gz" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=initramfs_${PLATFORM}.tar.gz"
 
-    - name: Upload Second Release Asset
-      id: upload-release-asset-2
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Image-qemu-aarch64-virt.tar.gz
-        asset_name: Image-qemu-aarch64-virt.tar.gz
-        asset_content_type: application/gzip
+          # Upload kernel image tarball
+          echo "Uploading Image-${PLATFORM}.tar.gz"
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/gzip" \
+            --data-binary @"Image-${PLATFORM}.tar.gz" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=Image-${PLATFORM}.tar.gz"
+        done
