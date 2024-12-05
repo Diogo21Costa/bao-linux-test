@@ -1,12 +1,7 @@
-name: Create Release
+name: Build and Release Linux Kernel and Initramfs for Multiple Platforms (Test Workflow)
 
 on:
-  push:
-    branches:
-      - main  # Trigger the action on pushes to the main branch
-  pull_request:
-    branches:
-      - main  # Trigger the action on PRs to the main branch
+  workflow_dispatch:
 
 jobs:
   build:
