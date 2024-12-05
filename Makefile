@@ -54,7 +54,7 @@ buildroot: setup
 	cd $(BUILDROOT_SRC) && \
 	make defconfig BR2_DEFCONFIG=$(BAO_BUILDROOT_DEFCFG) && \
 	make
-	cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(ARCH).cpio
+	cp $(BUILDROOT_SRC)/output/images/rootfs.cpio $(WRKDIR)/rootfs_$(PLATFORM).cpio
 
 linux: setup
 	git clone $(LINUX_REPO) $(LINUX_SRC) --depth 1 --branch $(LINUX_VERSION)
