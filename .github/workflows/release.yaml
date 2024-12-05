@@ -28,19 +28,18 @@ jobs:
             ARCH="riscv64"
           fi
           
-          # Create initramfs placeholder file
-          echo "This is a placeholder for initramfs for $PLATFORM" > "initramfs_${PLATFORM}.cpio.txt"
-          tar -czvf initramfs_${PLATFORM}.cpio.txt.tar.gz initramfs_${PLATFORM}.cpio
+          # Create empty initramfs placeholder .cpio file
+          touch "initramfs_${PLATFORM}.cpio"
           
-          # Create kernel image placeholder file
-          echo "This is a placeholder for kernel image for $PLATFORM" > "Image-${PLATFORM}.txt"
-          tar -czvf Image-${PLATFORM}.txt.tar.gz Image-${PLATFORM}
+          # Create empty kernel image placeholder .Image file
+          touch "Image-${PLATFORM}"
         done
 
     - name: List created files
       run: |
         # List the created placeholder files
-        ls *.txt
+        ls *.cpio
+        ls *.Image
 
     - name: Create Release
       id: create_release
@@ -60,8 +59,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./initramfs_qemu-aarch64-virt.cpio.txt  # Adjust file paths as needed
-        asset_name: initramfs_qemu-aarch64-virt.cpio.txt
+        asset_path: ./initramfs_qemu-aarch64-virt.cpio  # Adjust file paths as needed
+        asset_name: initramfs_qemu-aarch64-virt.cpio
+
     - name: Upload Second Release Asset
       id: upload-release-asset-2
       uses: actions/upload-release-asset@v1
@@ -69,5 +69,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Image-qemu-aarch64-virt.txt
-        asset_name: Image-qemu-aarch64-virt.txt
+        asset_path: ./Image-qemu-aarch64-virt  # Adjust file paths as needed
+        asset_name: Image-qemu-aarch64-virt
