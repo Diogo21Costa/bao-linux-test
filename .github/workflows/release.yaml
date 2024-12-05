@@ -30,9 +30,11 @@ jobs:
           
           # Create initramfs placeholder file
           echo "This is a placeholder for initramfs for $PLATFORM" > "initramfs_${PLATFORM}.cpio.txt"
+          tar -czvf initramfs_${PLATFORM}.cpio.txt.tar.gz initramfs_${PLATFORM}.cpio
           
           # Create kernel image placeholder file
           echo "This is a placeholder for kernel image for $PLATFORM" > "Image-${PLATFORM}.txt"
+          tar -czvf Image-${PLATFORM}.txt.tar.gz Image-${PLATFORM}
         done
 
     - name: List created files
