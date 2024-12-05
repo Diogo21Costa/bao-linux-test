@@ -14,28 +14,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: Build Initramfs for each platform
-    #   run: |
-    #     # Loop through platforms to build initramfs
-    #     for PLATFORM in $PLATFORMS; do
-    #       # Set architecture and platform-specific parameters
-    #       if [ "$PLATFORM" == "qemu-aarch64-virt" ]; then
-    #         ARCH="aarch64"
-    #       elif [ "$PLATFORM" == "qemu-riscv64-virt" ]; then
-    #         ARCH="riscv64"
-    #       fi
+    - name: Build Initramfs for each platform
+      run: |
+        # Loop through platforms to build initramfs
+        for PLATFORM in $PLATFORMS; do
+          # Set architecture and platform-specific parameters
+          if [ "$PLATFORM" == "qemu-aarch64-virt" ]; then
+            ARCH="aarch64"
+          elif [ "$PLATFORM" == "qemu-riscv64-virt" ]; then
+            ARCH="riscv64"
+          fi
           
-    #       # Export platform and architecture variables for Makefile
-    #       export PLATFORM
-    #       export ARCH
+          # Export platform and architecture variables for Makefile
+          export PLATFORM
+          export ARCH
           
-    #       # Build initramfs using the Makefile (Buildroot step)
-    #       echo "Building Initramfs for $PLATFORM"
-    #       make PLATFORM=$PLATFORM ARCH=$ARCH buildroot  # This will build the rootfs.cpio file
+          # Build initramfs using the Makefile (Buildroot step)
+          echo "Building Initramfs for $PLATFORM"
+          make PLATFORM=$PLATFORM ARCH=$ARCH buildroot  # This will build the rootfs.cpio file
           
-    #       # Compress the initramfs placeholder into a .tar.gz file
-    #       tar -czf "initramfs_${PLATFORM}.tar.gz" "wrkdir/rootfs_${PLATFORM}.cpio"
-    #     done
+          # Compress the initramfs placeholder into a .tar.gz file
+          tar -czf "initramfs_${PLATFORM}.tar.gz" "wrkdir/rootfs_${PLATFORM}.cpio"
+        done
 
     - name: Build Kernel Image for each platform
       run: |
