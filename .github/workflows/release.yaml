@@ -63,6 +63,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./initramfs_qemu-aarch64-virt.tar.gz
         asset_name: initramfs_qemu-aarch64-virt.tar.gz
+        asset_content_type: application/gzip
 
     - name: Upload Second Release Asset
       id: upload-release-asset-2
@@ -73,3 +74,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./Image-qemu-aarch64-virt.tar.gz
         asset_name: Image-qemu-aarch64-virt.tar.gz
+        asset_content_type: application/gzip
