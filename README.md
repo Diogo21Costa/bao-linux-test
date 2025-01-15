@@ -1,71 +1,101 @@
-# Build Instructions
+# Linux Guests Build for Bao Hypervisor
 
+This repository facilitates the building of Linux guest images to run on top of the Bao hypervisor. It primarily supports a test framework by automating the configuration and build processes for both the Linux kernel and the Buildroot root filesystem.
 
-## 0. Setup environment
+## Prerequisites
 
-```sh
-export ARCH=aarch64
-export PLAFORM=qemu-aarch64-virt
-export ROOT_DIR=$(realpath .)
-export WRKDIR=$ROOT_DIR/wrkdir
+Ensure the following dependencies are installed on your system:
 
-export BUILDROOT_ARCH=arm64
+- `git`
+- `make`
 
-export LINUX_REPO=https://github.com/torvalds/linux.git
-export LINUX_VERSION=v6.1
-export LINUX_SRC=$WRKDIR/linux-$LINUX_VERSION
+## Repository Overview
 
-export BUILDROOT_REPO=https://github.com/buildroot/buildroot.git
-export BUILDROOT_VERSION=2022.11
-export BUILDROOT_SRC=$WRKDIR/buildroot-$ARCH-$BUILDROOT_VERSION
+- **Makefile**: Central build automation script.
+- **buildroot/**: Contains platform-specific Buildroot configuration files.
+- **patches/**: Contains optional Linux kernel patches for specific versions.
 
-mkdir -p $ROOT_DIR/wrkdir
+## Usage
+
+### Environment Variables
+
+- `PLATFORM`: Target platform to build for (e.g., `qemu-aarch64-virt`, `imx8qm`).
+- `ARCH`: Target architecture (e.g., `aarch64`, `riscv64`).
+
+### Supported Platforms
+
+#### AArch64 Platforms
+
+| Platform          | Supported | Tested |
+|-------------------|:---------:|:------:|
+| qemu-aarch64-virt | ✅        | ✅    |
+| fvp-a             | ✅        |       |
+| fvp-r             | ✅        |       |
+| zcu102            | ✅        |       |
+| zcu104            | ✅        |       |
+| imx8qm            | ✅        |       |
+| tx2               | ✅        |       |
+| rpi4              | ✅        |       |
+
+#### RISC-V Platforms
+
+| Platform             | Supported | Tested |
+|----------------------|:---------:|:------:|
+| qemu-riscv64-virt    | ✅        | ✅     |
+### Building
+
+Run the following commands to build the Linux guest images:
+
+1. **Set the environment variables:**
+   ```bash
+   export PLATFORM=<target_platform>
+   export ARCH=<target_architecture>
+   ```
+
+   Example:
+   ```bash
+   export PLATFORM=qemu-aarch64-virt
+   export ARCH=aarch64
+   ```
+
+2. **Run the build process:**
+   ```bash
+   make all
+   ```
+
+   This will:
+   - Clone and build Buildroot to create the root filesystem (`rootfs.cpio`).
+   - Clone and build the Linux kernel for the specified platform.
+
+3. **Output Files:**
+   - Root filesystem: `wrkdir/rootfs_<PLATFORM>.cpio`
+   - Kernel image: `wrkdir/Image-<PLATFORM>`
+
+### Cleaning Up
+
+To clean all build artifacts, run:
+```bash
+make clean
 ```
 
-## 1. Download Buildroot and create rootfs
-```sh
-export BAO_BUILDROOT_DEFCFG=$ROOT_DIR/buildroot/$ARCH.config
-git clone $BUILDROOT_REPO $BUILDROOT_SRC\
-    --depth 1 --branch $BUILDROOT_VERSION
+## Makefile Targets
 
-cd $BUILDROOT_SRC
-make defconfig BR2_DEFCONFIG=$BAO_BUILDROOT_DEFCFG
+- `all`: Builds both the Linux kernel and Buildroot root filesystem.
+- `setup`: Prepares the working directory.
+- `buildroot`: Builds the Buildroot root filesystem.
+- `linux`: Builds the Linux kernel.
+- `clean`: Removes all build artifacts.
 
-make
-```
+## Customization
 
-## 2. Download the Linux kernel source
+### Buildroot Configuration
 
+Default Buildroot configurations are located in the `buildroot/` directory and are named according to the target architecture (e.g., `aarch64.config`, `riscv64.config`). Modify these files to customize the Buildroot build process.
 
-```sh
-git clone $LINUX_REPO $LINUX_SRC\
-    --depth 1 --branch $LINUX_VERSION
-cd $LINUX_SRC
-git am $ROOT_DIR/patches/$LINUX_VERSION/*.patch
+### Linux Kernel Patches
 
-export LINUX_SRC_CFG_FRAG=$(ls $ROOT_DIR/configs/base.config\
-    $ROOT_DIR/configs/$ARCH.config\
-    $ROOT_DIR/configs/$PLATFORM.config 2> /dev/null)
+If custom patches are required for the Linux kernel:
 
-make defconfig ARCH=$BUILDROOT_ARCH CROSS_COMPILE=$BUILDROOT_SRC/output/host/bin/$ARCH-linux-
-make ARCH=$BUILDROOT_ARCH CROSS_COMPILE=$BUILDROOT_SRC/output/host/bin/$ARCH-linux- -j$(nproc) Image
-cp $LINUX_SRC/arch/$BUILDROOT_ARCH/boot/Image $WRKDIR/Image-$PLATFORM
-```
-
-## 3. compile Linux's device tree and static guest loader (to run over Bao)
-
-Compile device tree:
-
-```sh
-dtc $ROOT_DIR/devicetrees/$PLATFORM/linux.dts -o $WRKDIR/linux.dtb
-```
-
-Compile static guest loader:
-```sh
-make -C $ROOT_DIR/bao-static-guest-loader\
-    ARCH=$ARCH\
-    IMAGE=$WRKDIR/Image-$PLATFORM\
-    DTB=$WRKDIR/linux.dtb\
-    TARGET=$WRKDIR/linux\
-    INITRAMFS=$WRKDIR/rootfs.cpio
-```
+1. Place patch files in the `patches/<kernel_version>/` directory.
+2. Ensure the directory name matches the kernel version (e.g., `patches/v6.1/`).
+3. The Makefile automatically applies patches during the kernel build process.
