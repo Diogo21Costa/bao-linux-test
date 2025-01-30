@@ -11,3 +11,4 @@ jobs:
   release-aarch64:
     name: Trigger qemu-aarch64-virt Release
     uses: ./.github/workflows/release_qemu-aarch64-virt.yaml
+

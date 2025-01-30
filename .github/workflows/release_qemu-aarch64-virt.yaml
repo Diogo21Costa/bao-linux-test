@@ -50,4 +50,5 @@ on:
               --data-binary @"$FILE" \
               "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$(basename $FILE)"
           done
+
   
