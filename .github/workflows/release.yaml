@@ -8,7 +8,7 @@ jobs:
     name: Create and Upload Release Asset
     runs-on: ubuntu-latest
     env:  # Define PLATFORMS as an environment variable
-      PLATFORMS: "qemu-riscv64-virt"
+      PLATFORMS: "qemu-aarch64-virt"
 
     steps:
     - name: Checkout code
