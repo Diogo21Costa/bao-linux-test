@@ -76,8 +76,9 @@ linux: setup
 	if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
 	  git apply $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
 	fi
+
 	cd $(LINUX_SRC) && \
-	make clean
+	make clean ARCH=$(BUILDROOT_ARCH) && \
 	make defconfig ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- && \
 	make ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- -j$$(nproc) Image
 	cp $(LINUX_SRC)/arch/$(BUILDROOT_ARCH)/boot/Image $(WRKDIR)/Image-$(PLATFORM)
