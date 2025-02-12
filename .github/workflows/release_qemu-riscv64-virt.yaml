@@ -43,6 +43,7 @@ on:
   
       - name: Upload Release Assets
         run: |
+          PLATFORM="qemu-aarch64-virt"
           for FILE in "initramfs_${PLATFORM}.tar.gz" "Image-${PLATFORM}.tar.gz"; do
             echo "Uploading $FILE"
             curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
