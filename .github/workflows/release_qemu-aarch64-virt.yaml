@@ -1,6 +1,3 @@
-on:
-  workflow_call:  # ✅ If called from another workflow, use 'workflow_call'
-
 name: Release for qemu-aarch64-virt
 
 jobs:
@@ -36,14 +33,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.0-${{ github.run_id }}
-        release_name: Release v1.0.0 for qemu-aarch64-virt
+        tag_name: v1.0.0-${PLATFORM}
+        release_name: Release v1.0.0 for ${PLATFORM}
         draft: false
         prerelease: false
 
     - name: Upload Release Assets
       run: |
-        PLATFORM="qemu-aarch64-virt"
         for FILE in "initramfs_${PLATFORM}.tar.gz" "Image-${PLATFORM}.tar.gz"; do
           echo "Uploading $FILE"
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
