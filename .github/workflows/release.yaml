@@ -6,9 +6,8 @@ name: Release All Platforms
 jobs:
   release-riscv64:
     name: Trigger qemu-riscv64-virt Release
-    uses: Diogo21Costa/bao-linux-test/blob/main/.github/workflows/release_qemu-aarch64-virt.yaml
+    uses: ./.github/workflows/release_qemu-riscv64-virt.yaml
 
   release-aarch64:
     name: Trigger qemu-aarch64-virt Release
-    uses: Diogo21Costa/bao-linux-test/blob/main/.github/workflows/release_qemu-aarch64-virt.yaml
-
+    uses: ./.github/workflows/release_qemu-aarch64-virt.yaml
