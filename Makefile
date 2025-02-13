@@ -26,7 +26,7 @@ ifeq ($(filter $(PLATFORM), $(PLATFORMS_AARCH64)), $(PLATFORM))
   endif
 
 else ifeq ($(filter $(PLATFORM), $(PLATFORMS_RISCV64)), $(PLATFORM))
-  BUILDROOT_ARCH := riscv64
+  BUILDROOT_ARCH := riscv
   LINUX_REPO := https://github.com/torvalds/linux.git
   LINUX_VERSION := v6.1
 
@@ -34,7 +34,7 @@ else
   $(error Unsupported PLATFORM: $(PLATFORM))
 endif
 
-BUILDROOT_SRC := $(WRKDIR)/buildroot-$(BUILDROOT_ARCH)-$(BUILDROOT_VERSION)
+BUILDROOT_SRC := $(WRKDIR)/buildroot-$(ARCH)-$(BUILDROOT_VERSION)
 LINUX_SRC := $(WRKDIR)/linux-$(PLATFORM)
 BAO_BUILDROOT_DEFCFG := $(ROOT_DIR)/buildroot/$(ARCH).config
 
@@ -76,8 +76,9 @@ linux: setup
 	if [ -d $(ROOT_DIR)/patches/$(LINUX_VERSION) ]; then \
 	  git apply $(ROOT_DIR)/patches/$(LINUX_VERSION)/*.patch; \
 	fi
+
 	cd $(LINUX_SRC) && \
-	make clean
+	make clean ARCH=$(BUILDROOT_ARCH) && \
 	make defconfig ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- && \
 	make ARCH=$(BUILDROOT_ARCH) CROSS_COMPILE=$(BUILDROOT_SRC)/output/host/bin/$(ARCH)-linux- -j$$(nproc) Image
 	cp $(LINUX_SRC)/arch/$(BUILDROOT_ARCH)/boot/Image $(WRKDIR)/Image-$(PLATFORM)
