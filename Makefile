@@ -26,7 +26,7 @@ ifeq ($(filter $(PLATFORM), $(PLATFORMS_AARCH64)), $(PLATFORM))
   endif
 
 else ifeq ($(filter $(PLATFORM), $(PLATFORMS_RISCV64)), $(PLATFORM))
-  BUILDROOT_ARCH := riscv64
+  BUILDROOT_ARCH := riscv
   LINUX_REPO := https://github.com/torvalds/linux.git
   LINUX_VERSION := v6.1
 
@@ -34,7 +34,7 @@ else
   $(error Unsupported PLATFORM: $(PLATFORM))
 endif
 
-BUILDROOT_SRC := $(WRKDIR)/buildroot-$(BUILDROOT_ARCH)-$(BUILDROOT_VERSION)
+BUILDROOT_SRC := $(WRKDIR)/buildroot-$(ARCH)-$(BUILDROOT_VERSION)
 LINUX_SRC := $(WRKDIR)/linux-$(PLATFORM)
 BAO_BUILDROOT_DEFCFG := $(ROOT_DIR)/buildroot/$(ARCH).config
 

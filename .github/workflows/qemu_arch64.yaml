@@ -1,49 +1,57 @@
-name: qemu-aarch64-virt linux guest build
+name: qemu-aarch64-virt Linux Guest Build
+
+on:
+  workflow_dispatch:
 
 jobs:
-    build-buildroot:
-        runs-on: ubuntu-latest
-        container: baoproject/bao:latest
-    
+  build-buildroot:
+    runs-on: ubuntu-latest
+    container: baoproject/bao:latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Build Initramfs
+      - name: Install Required Packages
         run: |
-            PLATFORM="qemu-aarch64-virt"
-            ARCH="aarch64"
-            export PLATFORM ARCH
-            echo "Building Initramfs for $PLATFORM"
-            make PLATFORM=$PLATFORM ARCH=$ARCH buildroot
-            tar -czf "initramfs_${PLATFORM}.tar.gz" "wrkdir/rootfs_${PLATFORM}.cpio"
+          apt-get update && apt-get install -y file cpio unzip rsync bc
 
-    - name: Build Kernel Image
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Initramfs
         run: |
-            PLATFORM="qemu-aarch64-virt"
-            ARCH="aarch64"
-            export PLATFORM ARCH
-            echo "Building Kernel Image for $PLATFORM"
-            make PLATFORM=$PLATFORM ARCH=$ARCH linux
-            tar -czf "Image-${PLATFORM}.tar.gz" "wrkdir/Image-${PLATFORM}"
-    
-    - name: Create Release
+          PLATFORM="qemu-aarch64-virt"
+          ARCH="aarch64"
+          export PLATFORM ARCH
+          echo "Building Initramfs for $PLATFORM"
+          make PLATFORM=$PLATFORM ARCH=$ARCH buildroot
+          tar -czf "initramfs_${PLATFORM}.tar.gz" "wrkdir/rootfs_${PLATFORM}.cpio"
+
+      - name: Build Kernel Image
+        run: |
+          PLATFORM="qemu-aarch64-virt"
+          ARCH="aarch64"
+          export PLATFORM ARCH
+          echo "Building Kernel Image for $PLATFORM"
+          make PLATFORM=$PLATFORM ARCH=$ARCH linux
+          tar -czf "Image-${PLATFORM}.tar.gz" "wrkdir/Image-${PLATFORM}"
+
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            tag_name: v1.0.0-${PLATFORM}
-            release_name: Release v1.0.0 for ${PLATFORM}
-            draft: false
-            prerelease: false
+          tag_name: v1.0.0-qemu-aarch64-virt
+          release_name: Release v1.0.0 for qemu-aarch64-virt
+          draft: false
+          prerelease: false
 
-    - name: Upload Release Assets
+      - name: Upload Release Assets
         run: |
-            for FILE in "initramfs_${PLATFORM}.tar.gz" "Image-${PLATFORM}.tar.gz"; do
-                echo "Uploading $FILE"
-                curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Content-Type: application/gzip" \
-                    --data-binary @"$FILE" \
-                    "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$(basename $FILE)"
-            done
+          PLATFORM="qemu-aarch64-virt"
+          for FILE in "initramfs_${PLATFORM}.tar.gz" "Image-${PLATFORM}.tar.gz"; do
+            echo "Uploading $FILE"
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"$FILE" \
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$(basename $FILE)"
+          done
